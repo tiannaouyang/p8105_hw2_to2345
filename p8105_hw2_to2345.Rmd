@@ -1,0 +1,198 @@
+---
+title: "p8105_hw2_to2345"
+author: Tianna_Ouyang
+date: 2019/09/24
+output: html_document
+---
+
+```{r setup,message=FALSE}
+# Load the packages that will be used in this assignment
+knitr::opts_chunk$set(echo = TRUE)
+library(psych)
+library(tidyr)
+library(tidyverse)
+library(readxl)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+
+```
+
+## Problem 1
+
+```{r question1, warning=FALSE}
+# Read and clean the Mr. Trash Wheel sheet
+trash_data = 
+  readxl::read_excel(
+    "../data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+    sheet = 1,
+    range = "A2:N211"
+    ) %>%
+  janitor::clean_names() %>%
+  na.omit() %>% 
+  mutate(
+    sports_balls = as.integer(round(sports_balls, 0))
+  ) %>% 
+  view
+
+# Read and clean precipitation data for 2017 and 2018
+precipitation_2018 = 
+  readxl::read_excel(
+  "../data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+  sheet = "2018 Precipitation",
+  range = "A2:B14"
+  ) %>% 
+  mutate(year = '2018') %>% 
+  view
+
+precipitation_2017 = 
+  readxl::read_excel(
+  "../data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+  sheet = "2017 Precipitation",
+  range = "A2:B14"
+  ) %>% 
+  mutate(year = '2017') %>% 
+  view
+
+precipitation =
+  bind_rows(precipitation_2017, precipitation_2018) %>% 
+  janitor::clean_names() %>% 
+  mutate(
+    month = month.name[month]
+  ) %>% 
+  view
+```
+
+
+* The cleaned Mr.Trash Wheel dataset has `r ncol(trash_data)` variables, `r nrow(trash_data)` records.
+* The precipitation data for 2017 and 2018 dataset has `r ncol(precipitation)` variables, `r nrow(precipitation)` records.
+* Some basic descriptive datas for the weight of trash in tons from Mr.Trash Wheel Dataset are:
+  + Mean: `r mean(pull(trash_data, weight_tons))`
+  + Median: `r median(pull(trash_data, weight_tons))`
+  + Min: `r min(pull(trash_data, weight_tons))`
+  + Max: `r max(pull(trash_data, weight_tons))`
+  + Variance: `r var(pull(trash_data, weight_tons))`
+  + Skewness: `r skew(pull(trash_data, weight_tons))`
+
+* For available data, the total precipitation in 2018 is `r sum(pull(precipitation, total)[pull(precipitation, year) == 2018], na.rm = TRUE)`;
+* The median number of sports balls in a dumpster in 2017 is `r median(pull(trash_data,sports_balls)[pull(trash_data, year) == 2017])`.
+
+## Problem 2
+
+```{r, warning=FALSE}
+# import and clean the data in pols-month.csv
+pols_month = 
+  read_csv("../data/fivethirtyeight_datasets/pols-month.csv") %>% 
+  janitor::clean_names() %>% 
+  separate(mon, into = c('year','month','day', sep = '-')) %>% 
+  mutate(
+    month = month.name[as.integer(month)],
+    year = as.integer(year),
+    president = recode(prez_gop, '1' = 'gop', '0' = 'dem')) %>% 
+  select(-c('prez_dem','prez_gop','-','day')) %>% 
+  view
+```
+
+```{r, warning=FALSE}
+# import and  clean the data in snp.csv
+snp = 
+  read_csv('../data/fivethirtyeight_datasets/snp.csv') %>% 
+  janitor::clean_names() %>% 
+  separate(date, into = c('month','day','year', sep = '/')) %>% 
+  mutate(
+    month = month.name[as.integer(month)],
+    year = as.integer(year)
+    ) %>%
+  select(year, month, close) %>%
+  arrange(year, match(month, month.name)) %>% 
+  view
+```
+
+
+
+```{r, warning=FALSE}
+# define a function to capitalize the first character in a string (will eb s)
+firstup <- function(x) {
+  substr(x, 1, 1) <- toupper(substr(x, 1, 1))
+  x}
+
+# import and tidy the unemployment data so that it can be merged with the previous datasets
+unemployment = 
+  read_csv('../data/fivethirtyeight_datasets/unemployment.csv') %>% 
+  janitor::clean_names() %>%
+  pivot_longer(
+    jan:dec,
+    names_to = 'month',
+    values_to = 'unemployment') %>%
+  mutate(
+    month = firstup(month),
+    month = month.name[match(month, month.abb)]
+  ) %>% 
+  view
+
+```
+
+
+*Join the datasets by merging snp into pols, and merging unemployment into the result.*
+```{r}
+# Join the dataset imported with common keys into new dataset 
+result = left_join(pols_month, snp, by = c('year' = 'year','month' = 'month'))
+result = left_join(result, unemployment, by = c('year' = 'year', 'month' = 'month'))
+```
+
+
+*Write a short paragraph about these datasets. Explain briefly what each dataset contained, and describe the resulting dataset (e.g. give the dimension, range of years, and names of key variables).*
+
+* The pols-month dataset has `r ncol(pols_month)` variables, `r nrow(pols_month)` records. 
+  + The variables in this dataset are `r names(pols_month)`.
+* The snp dataset has `r ncol(snp)` variables, `r nrow(snp)` records.
+  + The variables in the dataset are `r names(snp)`.
+* The unemployment dataset has `r ncol(unemployment)` variables, `r nrow(unemployment)` records.
+  + The variables in the dataset are `r names(unemployment)`
+* The resulting dataset has `r ncol(result)` variables, `r nrow(result)` records.
+  + The range of years in the resulting dataset is [`r range(pull(result, year))`]
+  + The variables in the resulting dataset are: `r names(result)`.
+
+
+## Problem 3
+
+*the names of a categorical predictor and the case structure of string variables changed over time; you’ll need to address this in your data cleaning.*
+*Also, some rows seem duplicated, and these will need to be removed.*
+```{r}
+# import the popular baby names file and perform corresponding data cleaning
+baby_name = 
+  read_csv("../data/Popular_Baby_Names.csv", col_types = "icccii") %>% 
+  janitor::clean_names() %>%
+  mutate(
+    gender = str_to_lower(gender),
+    ethnicity = str_to_lower(ethnicity),
+    childs_first_name = str_to_lower(childs_first_name)
+  ) %>%
+  distinct() %>% 
+  view
+```
+
+*Produce a table showing the rank in popularity of the name “Olivia” as a female baby name over time; this should have rows for ethnicities and columns for year.*
+
+```{r}
+# make a new table based on the data subsetting from original dataframe with condition
+olivia = subset(baby_name, childs_first_name == "olivia" & gender == "female")
+olivia = select(olivia, year_of_birth, ethnicity, rank)
+kable(olivia, caption = "The popularity of 'Olivia' in female baby over time") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), full_width = F)
+```
+
+*for male, white non-hispanic children born in 2016, produce a scatter plot showing the number of children with a name (y axis) against the rank in popularity of that name (x axis)*
+
+```{r}
+# make a scatter plot describing the relationship between rank and the count of names
+scatter_point = subset(baby_name, gender == "male" & ethnicity == "white non hispanic" & year_of_birth == 2016)
+plot_df = tibble(
+  x = pull(scatter_point, rank),
+  y = pull(scatter_point, count)
+)
+ggplot(plot_df, aes(x = x, y = y))+ geom_point(color = "#00AFBB", size = 2, shape = 23)
+```
+
+*  From the scatter plot we can see that there is a negative relationship between the number of childen with a name and the rank in popularity of that name, in other words, the higher the number of childer with a name, the rank in popularity of that name will be smaller for male, white non-hispanic children in 2016.
+
