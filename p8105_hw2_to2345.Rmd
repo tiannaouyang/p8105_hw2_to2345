@@ -2,7 +2,7 @@
 title: "p8105_hw2_to2345"
 author: Tianna_Ouyang
 date: 2019/09/24
-output: github_document
+output: html_document
 ---
 
 ```{r setup,message=FALSE}

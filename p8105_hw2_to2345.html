@@ -392,9 +392,9 @@ library(kableExtra)</code></pre>
 <pre class="r"><code># Read and clean the Mr. Trash Wheel sheet
 trash_data = 
   readxl::read_excel(
-    &quot;../data/HealthyHarborWaterWheelTotals2018-7-28.xlsx&quot;,
+    &quot;../data/Trash-Wheel-Collection-Totals-8-6-19.xlsx&quot;,
     sheet = 1,
-    range = &quot;A2:N211&quot;
+    range = &quot;A2:N406&quot;
     ) %&gt;%
   janitor::clean_names() %&gt;%
   na.omit() %&gt;% 
@@ -430,19 +430,19 @@ precipitation =
   ) %&gt;% 
   view</code></pre>
 <ul>
-<li>The cleaned Mr.Trash Wheel dataset has 14 variables, 174 records.</li>
+<li>The cleaned Mr.Trash Wheel dataset has 14 variables, 344 records.</li>
 <li>The precipitation data for 2017 and 2018 dataset has 3 variables, 24 records.</li>
 <li>Some basic descriptive datas for the weight of trash in tons from Mr.Trash Wheel Dataset are:
 <ul>
-<li>Mean: 3.2498851</li>
+<li>Mean: 3.262936</li>
 <li>Median: 3.265</li>
-<li>Min: 1.24</li>
+<li>Min: 0.96</li>
 <li>Max: 5.62</li>
-<li>Variance: 0.6708613</li>
-<li>Skewness: 0.1696691</li>
+<li>Variance: 0.5582237</li>
+<li>Skewness: 0.0087192</li>
 </ul></li>
 <li>For available data, the total precipitation in 2018 is 23.5;</li>
-<li>The median number of sports balls in a dumpster in 2017 is 13.</li>
+<li>The median number of sports balls in a dumpster in 2017 is 8.</li>
 </ul>
 </div>
 <div id="problem-2" class="section level2">
