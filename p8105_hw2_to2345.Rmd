@@ -24,9 +24,9 @@ library(kableExtra)
 # Read and clean the Mr. Trash Wheel sheet
 trash_data = 
   readxl::read_excel(
-    "../data/HealthyHarborWaterWheelTotals2018-7-28.xlsx",
+    "../data/Trash-Wheel-Collection-Totals-8-6-19.xlsx",
     sheet = 1,
-    range = "A2:N211"
+    range = "A2:N406"
     ) %>%
   janitor::clean_names() %>%
   na.omit() %>% 
