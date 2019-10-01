@@ -2,7 +2,7 @@
 title: "p8105_hw2_to2345"
 author: Tianna_Ouyang
 date: 2019/09/24
-output: html_document
+output: github_document
 ---
 
 ```{r setup,message=FALSE}
@@ -90,7 +90,7 @@ pols_month =
     year = as.integer(year),
     president = recode(prez_gop, '1' = 'gop', '0' = 'dem')) %>% 
   select(-c('prez_dem','prez_gop','-','day')) %>% 
-  view
+  view 
 ```
 
 ```{r, warning=FALSE}
@@ -191,7 +191,7 @@ plot_df = tibble(
   x = pull(scatter_point, rank),
   y = pull(scatter_point, count)
 )
-ggplot(plot_df, aes(x = x, y = y))+ geom_point(color = "#00AFBB", size = 2, shape = 23)
+ggplot(plot_df, aes(x = x, y = y))+ geom_point(color = "#00AFBB", size = 2)
 ```
 
 *  From the scatter plot we can see that there is a negative relationship between the number of childen with a name and the rank in popularity of that name, in other words, the higher the number of childer with a name, the rank in popularity of that name will be smaller for male, white non-hispanic children in 2016.
